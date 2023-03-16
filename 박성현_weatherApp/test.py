@@ -23,4 +23,7 @@ total_url = api_url + queryString
 # SSL 문제 때문에 계속 에러나서 진행이 안됐음
 response = requests.get(total_url, verify=False)
 json_data = json.loads(response.text)
-print(json_data)
+
+weather_data = json_data['response']['body']['items']['item']
+
+print(weather_data)
