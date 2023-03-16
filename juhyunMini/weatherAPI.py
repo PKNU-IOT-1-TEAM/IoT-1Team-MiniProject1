@@ -1,12 +1,12 @@
 # API
 from urllib.parse import urlencode # 한글을 URLencode 변환하는 함수
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta as td
 import requests
 import json
 # MYSQL
 import pymysql
 
-def getDataPortalSearch(date, time):
+def getDataPortalSearch(baseDate, baseTime):
     api_url = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst'
     queryString = '?' + urlencode(
         {
@@ -14,8 +14,8 @@ def getDataPortalSearch(date, time):
             'pageNo': '1',
             'numOfRows': '1000',
             'dataType': 'JSON',
-            'base_date': date,
-            'base_time': time,
+            'base_date': baseDate,
+            'base_time': baseTime,
             'nx': 98,
             'ny': 76
         }
@@ -24,45 +24,112 @@ def getDataPortalSearch(date, time):
     response = requests.get(total_url, verify=False)
     return response.text
 
-def weaterData():   # respnse 데이터 
+def weatherData():   # respnse 데이터 가져와서 사용하기 좋게 가공
     
-    date = f'{dt.now().date().strftime("%Y%m%d")}'
-    # time = f'{dt.now().time().strftime("%H%M")}'
-    time = '0500'
+    # 검색 날짜, 시간 설정
+    baseDate = f'{dt.now().date().strftime("%Y%m%d")}'
+    nowTime = int(dt.now().time().strftime("%H"))
+    if nowTime == 24:
+        baseTime = '2300'
+    elif nowTime >= 21:
+        baseTime = '2000'
+    elif nowTime >= 18:
+        baseTime = '1700'
+    elif nowTime >= 15:
+        baseTime = '1400'
+    elif nowTime >= 12:
+        baseTime = '1100'
+    elif nowTime >= 9:
+        baseTime = '0800'
+    elif nowTime >= 6:
+        baseTime = '0500'
+    elif nowTime >= 3:
+        baseTime = '0200'
+    else:
+        baseTime = '2300'
+        baseDate = f'{(dt.now().date() - td(days=1)).strftime("%Y%m%d")}'
     
     try:
-        result = getDataPortalSearch(date, time)
-        # print(result)
+        result = getDataPortalSearch(baseDate, baseTime)
         json_data = json.loads(result)
         weather_data = json_data['response']['body']['items']['item']
-        # print(weather_data)
-        # for item in weather_data:
-            # print(item) # 딕셔너리
     except Exception as e:
         print('찾는 데이터가 없습니다.')
+    
+    changeDate = weather_data[0]['fcstDate']
+    changeTime = weather_data[0]['fcstTime']
+    fcstData = dict()
+    allFcstData = []
 
-    conn = pymysql.connect(host='210.119.12.66', user = 'root', password='12345',
-                            db = 'miniproject01', charset='utf8')
-    cur = conn.cursor()    # Connection으로부터 Cursor 생성
-    
-    
     for item in weather_data:
-        # if item['fcstDate'] == date:
-        #     day1 = {fcstDate: }
-        if item['category'] == 'TMP':
-            fcstDate = item['fcstDate']
-            fcstTime = item['fcstTime']
-            tmp = item['fcstValue']
-            # print(fcstDate, fcstTime, tmp)
-            query = '''INSERT INTO juhyunlee (fcstDate, fcstTime, TMP)
-                            VALUES (%s, %s, %s)'''
-            cur.execute(query, (fcstDate, fcstTime, tmp))
-            conn.commit()
-    
+        del item['baseDate'], item['baseTime'], item['nx'], item['ny']
+        if item['category'] == 'TMP':   # 온도
+            item['tmp'] = item['fcstValue']
+        elif item['category'] == 'VEC': # 풍향
+            item['vec'] = item['fcstValue']
+        elif item['category'] == 'WSD': # 풍속
+            item['wsd'] = item['fcstValue']
+        elif item['category'] == 'SKY': # 하늘 상태
+            item['sky'] = item['fcstValue']
+        elif item['category'] == 'PTY': # 강수 형태 
+            item['wsd'] = item['fcstValue']
+        elif item['category'] == 'POP': # 강수 확률
+            item['pop'] = item['fcstValue']
+        elif item['category'] == 'PCP': # 1시간 강수량
+            item['pcp'] = item['fcstValue']
+        elif item['category'] == 'REH': # 습도
+            item['reh'] = item['fcstValue']
+        elif item['category'] == 'SNO': # 신적설
+            item['sno'] = item['fcstValue']
+        elif item['category'] == 'TMN': # 하루 최저 온도
+            item['tmn'] = item['fcstValue']
+        elif item['category'] == 'TMM': # 하루 최고 온도
+            item['tmm'] = item['fcstValue']
+        del item['category'], item['fcstValue']
+
+        if changeDate == item['fcstDate'] and changeTime == item['fcstTime']:
+            fcstData = fcstData|item
+        else:
+            allFcstData.append(fcstData)
+            fcstData = dict()
+            fcstData = item
+
+        changeDate = item['fcstDate']
+        changeTime = item['fcstTime']
+
+    return allFcstData
+
+def insertDB():
+    conn = pymysql.connect(host='localhost', user = 'root', password='12345',
+                           db = 'miniproject', charset='utf8')
+    cur = conn.cursor()    # Connection으로부터 Cursor 생성
+
+    allFcstData = weatherData()
+
+    for fcstData in allFcstData:
+        if 'tmn' in fcstData.keys():
+            query = '''INSERT INTO weather (fcstDate, fcstTime, TMP, VEC, WSD, SKY, POP, PCP, REH, SNO, TMN)
+                      VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+            cur.execute(query, (fcstData['fcstDate'], fcstData['fcstTime'], fcstData['tmp'],
+                            fcstData['vec'], fcstData['wsd'], fcstData['sky'], fcstData['pop'],
+                            fcstData['pcp'], fcstData['reh'], fcstData['sno'], fcstData['tmn']))
+        elif 'tmm' in fcstData.keys():
+            query = '''INSERT INTO weather (fcstDate, fcstTime, TMP, VEC, WSD, SKY, POP, PCP, REH, SNO, TMM)
+                      VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+            cur.execute(query, (fcstData['fcstDate'], fcstData['fcstTime'], fcstData['tmp'],
+                            fcstData['vec'], fcstData['wsd'], fcstData['sky'], fcstData['pop'],
+                            fcstData['pcp'], fcstData['reh'], fcstData['sno'], fcstData['tmm']))
+        else:
+            query = '''INSERT INTO weather (fcstDate, fcstTime, TMP, VEC, WSD,  SKY, POP, PCP, REH, SNO)
+                      VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+            cur.execute(query, (fcstData['fcstDate'], fcstData['fcstTime'], fcstData['tmp'],
+                            fcstData['vec'], fcstData['wsd'], fcstData['sky'], fcstData['pop'],
+                            fcstData['pcp'], fcstData['reh'], fcstData['sno']))
+            
+        conn.commit()
+
     conn.close()
     print('저장')
 
-
-weaterData()
-
+insertDB()
 
