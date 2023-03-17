@@ -3,72 +3,79 @@ from urllib.parse import urlencode # 한글을 URLencode 변환하는 함수
 from FcstAPI import *
 import datetime
 from datetime import datetime as dt, timedelta as td
-import requests
 import json
 # MYSQL
 import pymysql
+# schedule
+import schedule
+import time
 
+# 처음 db 삽입 후 설정한 시간되면 자동으로 업데이트
 class FcstDB:
     def __init__(self) -> None:
-        print(f'[{dt.now()}] 기상DB 생성')
+        self.mode = 1
         self.insertDB()
+        print(f'[{dt.now()}] 기상DB 생성 완료')
+        self.mode = 0
 
     def insertDB(self):
         # 주현집 host
-        # conn = pymysql.connect(host='localhost', user = 'root', password='12345',
-        #                        db = 'miniproject', charset='utf8')
+        conn = pymysql.connect(host='localhost', user = 'root', password='12345',
+                               db = 'miniproject', charset='utf8')
         # 성현DB
-        conn = pymysql.connect(host='210.119.12.66', user = 'root', password='12345',
-                            db = 'miniproject01', charset='utf8')
+        # conn = pymysql.connect(host='210.119.12.66', user = 'root', password='12345',
+        #                     db = 'miniproject01', charset='utf8')
         cur = conn.cursor()    # Connection으로부터 Cursor 생성
 
-        query = '''DELETE FROM weather'''
+        query = '''TRUNCATE weather'''
         cur.execute(query)
 
         allFcstData = self.newData()
-
         for fcstData in allFcstData:
             if 'TMN' in fcstData.keys():
-                query = '''INSERT INTO weather (fcstDate, fcstTime, TMP, VEC, WSD, SKY, POP, PCP, REH, SNO, TMN)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
-                cur.execute(query, (fcstData['fcstDate'], fcstData['fcstTime'], fcstData['TMP'],
-                                fcstData['VEC'], fcstData['WSD'], fcstData['SKY'], fcstData['POP'],
-                                fcstData['PCP'], fcstData['REH'], fcstData['SNO'], fcstData['TMN']))
+                query = '''INSERT INTO weather (fcstDate, fcstTime, TMP, VEC, WSD, SKY, PTY, POP, PCP, REH, SNO, TMN)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+                cur.execute(query, (fcstData['fcstDate'], fcstData['fcstTime'], fcstData['TMP'], fcstData['VEC'],
+                                    fcstData['WSD'], fcstData['SKY'], fcstData['PTY'], fcstData['POP'],
+                                    fcstData['PCP'], fcstData['REH'], fcstData['SNO'], fcstData['TMN']))
             elif 'TMM' in fcstData.keys():
-                query = '''INSERT INTO weather (fcstDate, fcstTime, TMP, , WSD, SKY, POP, PCP, REH, SNO, TMM)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
-                cur.execute(query, (fcstData['fcstDate'], fcstData['fcstTime'], fcstData['TMP'],
-                                fcstData['VEC'], fcstData['WSD'], fcstData['SKY'], fcstData['POP'],
-                                fcstData['PCP'], fcstData['REH'], fcstData['SNO'], fcstData['TMM']))
+                query = '''INSERT INTO weather (fcstDate, fcstTime, TMP, PTY, WSD, SKY, PTY, POP, PCP, REH, SNO, TMM)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+                cur.execute(query, (fcstData['fcstDate'], fcstData['fcstTime'], fcstData['TMP'], fcstData['VEC'],
+                                    fcstData['WSD'], fcstData['SKY'], fcstData['PTY'], fcstData['POP'],
+                                    fcstData['PCP'], fcstData['REH'], fcstData['SNO'], fcstData['TMM']))
             else:
-                query = '''INSERT INTO weather (fcstDate, fcstTime, TMP, VEC, WSD,  SKY, POP, PCP, REH, SNO)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
-                cur.execute(query, (fcstData['fcstDate'], fcstData['fcstTime'], fcstData['TMP'],
-                                fcstData['VEC'], fcstData['WSD'], fcstData['SKY'], fcstData['POP'],
-                                fcstData['PCP'], fcstData['REH'], fcstData['SNO']))
+                query = '''INSERT INTO weather (fcstDate, fcstTime, TMP, VEC, WSD, SKY, PTY, POP, PCP, REH, SNO)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+                cur.execute(query, (fcstData['fcstDate'], fcstData['fcstTime'], fcstData['TMP'], fcstData['VEC'],
+                                    fcstData['WSD'], fcstData['SKY'], fcstData['PTY'], fcstData['POP'],
+                                    fcstData['PCP'], fcstData['REH'], fcstData['SNO']))
                 
             conn.commit()
 
         conn.close()
-        print('DB저장완료')
+        print('DB 데이터 삽입')
     
     def newData(self):
         # 검색 날짜 설정
         baseDate = f'{dt.now().date().strftime("%Y%m%d")}'
-        nowTime = dt.now().time()
-        API_TIME = [datetime.time(2,10), datetime.time(5,10), datetime.time(8,10),
-                    datetime.time(11,10), datetime.time(14,10), datetime.time(17,10),
-                    datetime.time(20,10), datetime.time(23,10)]
+        if self.mode:    # 현재 시간을 기준으로 업데이트
+            nowTime = dt.now().time()
+            API_TIME = [datetime.time(2,10), datetime.time(5,10), datetime.time(8,10),
+                        datetime.time(11,10), datetime.time(14,10), datetime.time(17,10),
+                        datetime.time(20,10), datetime.time(23,10)]
 
-        for i, time in enumerate(API_TIME[::-1]):
-            if nowTime >= time:
-                baseTime = f'{time.strftime("%H")}00'
-                break
-            elif nowTime < API_TIME[0]:
-                baseDate = f'{(dt.now().date() - td(days=1)).strftime("%Y%m%d")}'
-                baseTime = f'{API_TIME[i-1].strftime("%H")}00'
-                break
-        
+            for i, time in enumerate(API_TIME[::-1]):
+                if nowTime >= time:
+                    baseTime = f'{time.strftime("%H")}00'
+                    break
+                elif nowTime < API_TIME[0]:
+                    baseDate = f'{(dt.now().date() - td(days=1)).strftime("%Y%m%d")}'
+                    baseTime = f'{API_TIME[i-1].strftime("%H")}00'
+                    break
+        else:   # 정해진 시간에 업데이트  
+            baseTime = f'{dt.now().time().strftime("%H")}00'
+
         # 실제 데이터 가져오기
         api = FcstAPI() # API 객체 생성
         try:
@@ -107,5 +114,18 @@ class FcstDB:
 
         return allFcstData
     
+if __name__ == '__main__':
 
-re = FcstDB()
+    db = FcstDB()
+    # 매일 설정된 시간에 자동으로 데이터 삽입
+    schedule.every().day.at("02:10").do(db.insertDB)
+    schedule.every().day.at("05:10").do(db.insertDB)
+    schedule.every().day.at("08:10").do(db.insertDB)
+    schedule.every().day.at("11:10").do(db.insertDB)
+    schedule.every().day.at("14:10").do(db.insertDB)
+    schedule.every().day.at("17:10").do(db.insertDB)
+    schedule.every().day.at("20:10").do(db.insertDB)
+    schedule.every().day.at("23:10").do(db.insertDB)
+
+    while True:
+        schedule.run_pending()
