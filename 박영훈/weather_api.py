@@ -1,3 +1,4 @@
+# https://velog.io/@chaeri93/Django-%EA%B8%B0%EC%83%81%EC%B2%AD-%EB%8B%A8%EA%B8%B0%EC%98%88%EB%B3%B4-API-%ED%99%9C%EC%9A%A9%ED%95%98%EA%B8%B0
 # import requests # 파이썬 requests 모듈은 간편한 HTTP 요청처리를 위해 사용하는 모듈
 import requests # from urllib.request import urlopen, Request # request 쓰면 좀더 안전함.
 from urllib.parse import *  # 한글을 URLencode 변환하는 함수. 롯데 --> '%EB%A1%AF%EB%8D%B0'
