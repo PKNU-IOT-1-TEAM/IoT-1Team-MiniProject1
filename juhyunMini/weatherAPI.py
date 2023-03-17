@@ -1,5 +1,6 @@
 # API
 from urllib.parse import urlencode # 한글을 URLencode 변환하는 함수
+import datetime
 from datetime import datetime as dt, timedelta as td
 import requests
 import json
@@ -28,27 +29,40 @@ def weatherData():   # respnse 데이터 가져와서 사용하기 좋게 가공
     
     # 검색 날짜, 시간 설정
     baseDate = f'{dt.now().date().strftime("%Y%m%d")}'
-    nowTime = int(dt.now().time().strftime("%H"))
-    if nowTime == 24:
-        baseTime = '2300'
-    elif nowTime >= 21:
-        baseTime = '2000'
-    elif nowTime >= 18:
-        baseTime = '1700'
-    elif nowTime >= 15:
-        baseTime = '1400'
-    elif nowTime >= 12:
-        baseTime = '1100'
-    elif nowTime >= 9:
-        baseTime = '0800'
-    elif nowTime >= 6:
-        baseTime = '0500'
-    elif nowTime >= 3:
-        baseTime = '0200'
-    else:
-        baseTime = '2300'
-        baseDate = f'{(dt.now().date() - td(days=1)).strftime("%Y%m%d")}'
-    
+    # nowTime = int(dt.now().time().strftime("%H"))
+    nowTime = dt.now().time()
+    API_TIME = [datetime.time(2,10), datetime.time(5,10), datetime.time(8,10),
+                datetime.time(11,10), datetime.time(14,10), datetime.time(17,10),
+                datetime.time(20,10), datetime.time(23,10)]
+
+    for i, time in enumerate(API_TIME[::-1]):
+        if nowTime >= time:
+            baseTime = f'{time.strftime("%H")}00'
+        else:
+            baseDate = f'{(dt.now().date() - td(days=1)).strftime("%Y%m%d")}'
+            baseTime = f'{API_TIME[i-1].strftime("%H")}00'
+
+    # if nowTime == 24:
+    #     baseTime = '2300'
+    # elif nowTime >= 21:
+    #     baseTime = '2000'
+    # elif nowTime >= 18:
+    #     baseTime = '1700'
+    # elif nowTime >= 15:
+    #     baseTime = '1400'
+    # elif nowTime >= 12:
+    #     baseTime = '1100'
+    # elif nowTime >= 9:
+    #     baseTime = '0800'
+    # elif nowTime >= 6:
+    #     baseTime = '0500'
+    # elif nowTime >= 3:
+    #     baseTime = '0200'
+    # else:
+    #     baseTime = '2300'
+    #     baseDate = f'{(dt.now().date() - td(days=1)).strftime("%Y%m%d")}'
+
+
     try:
         result = getDataPortalSearch(baseDate, baseTime)
         json_data = json.loads(result)
