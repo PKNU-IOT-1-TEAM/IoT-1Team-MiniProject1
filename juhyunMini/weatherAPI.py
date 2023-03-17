@@ -100,8 +100,12 @@ def weatherData():   # respnse 데이터 가져와서 사용하기 좋게 가공
     return allFcstData
 
 def insertDB():
-    conn = pymysql.connect(host='localhost', user = 'root', password='12345',
-                           db = 'miniproject', charset='utf8')
+    # 주현집 host
+    # conn = pymysql.connect(host='localhost', user = 'root', password='12345',
+    #                        db = 'miniproject', charset='utf8')
+    # 성현dDB
+    conn = pymysql.connect(host='210.119.12.66', user = 'root', password='12345',
+                           db = 'miniproject01', charset='utf8')
     cur = conn.cursor()    # Connection으로부터 Cursor 생성
 
     allFcstData = weatherData()
