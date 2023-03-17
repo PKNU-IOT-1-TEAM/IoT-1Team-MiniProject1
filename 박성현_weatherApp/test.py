@@ -2,7 +2,7 @@ import requests # 기본적인 URL 모듈로는 안되서 대체
 from datetime import *
 from urllib.request import *
 from urllib.parse import *  # 한글을 URLencode 변환하는 함수
-from datetime import *
+from bs4 import BeautifulSoup as bs
 import json
 
 API_TIME = [2, 5, 8, 11, 14, 17, 20, 23]
@@ -17,13 +17,16 @@ class weather_Logic:
 
     def Short_term_checkDate(self):
         # 현재 시간
-        now = datetime.now()
-
-        for time in range(7):
+        now = datetime.now() # 오늘 시간
+        today = datetime.today().strftime("%Y%m%d") # 특수문자 제거
+        
+        for time in range(8):
+            now_time = str(API_TIME[time]) + str(API_MINUTE) # 현재와 제일 가까운 시간
+            pre_time = str(API_TIME[time - 1]) + str(API_MINUTE) # 이전 시간 - 발표 시간 시간 사이에 끼어있는 애매한 시간
             if now.hour is API_TIME[time] and now.minute >= API_MINUTE:
-                break      
+                return today , now_time
             elif API_TIME[time - 1] < now.hour <= API_TIME[time]:
-                return datetime.today().strftime("%Y%m%d") , str(API_TIME[time - 1]) + str(API_MINUTE)
+                return today , pre_time
             else:
                 time += 1
                 
@@ -55,8 +58,8 @@ class weather_Logic:
             base_date = today
         return base_date, base_time
 
-
     def callWeather(self, base_date, base_time):
+        
     # require parameter
 
     # serviceKey : 인증키
@@ -109,51 +112,54 @@ class weather_Logic:
             # 예보 값
             # 강수확률 (%)
             if item['category'] == 'POP':
-                weather_data[Date][Time]['pop'] = item['fcstValue']
+                weather_data[Date][Time]['강수확률'] = item['fcstValue']
             # 강수형태 
             if item['category'] == 'PTY':
-                weather_data[Date][Time]['pty'] = item['fcstValue']
+                weather_data[Date][Time]['강수형태'] = item['fcstValue']
             # 1시간 강수량
             if item['category'] == 'PCP':
-                weather_data[Date][Time]['pcp'] = item['fcstValue']
+                weather_data[Date][Time]['1시간 강수량'] = item['fcstValue']
             # 습도
             if item['category'] == 'REH':
-                weather_data[Date][Time]['reh'] = item['fcstValue']
+                weather_data[Date][Time]['습도'] = item['fcstValue']
             # 1시간 신적설
             if item['category'] == 'SNO':
-                weather_data[Date][Time]['sno'] = item['fcstValue']
+                weather_data[Date][Time]['1시간 신적설'] = item['fcstValue']
             # 하늘상태
             if item['category'] == 'SKY':
-                weather_data[Date][Time]['sky'] = item['fcstValue']
+                weather_data[Date][Time]['하늘상태'] = item['fcstValue']
             # 1시간 기온
             if item['category'] == 'TMP':
-                weather_data[Date][Time]['tmp'] = item['fcstValue']
+                weather_data[Date][Time]['1시간 기온'] = item['fcstValue']
             # 일 최저기온
             if item['category'] == 'TMN':
-                weather_data[Date][Time]['tmn'] = item['fcstValue']
+                weather_data[Date][Time]['일 최저기온'] = item['fcstValue']
             # 일 최고기온
             if item['category'] == 'TMX':
-                weather_data[Date][Time]['tmx'] = item['fcstValue']
+                weather_data[Date][Time]['일 최고기온'] = item['fcstValue']
             # 풍속(동서성분)
             if item['category'] == 'UUU':
-                weather_data[Date][Time]['uuu'] = item['fcstValue']
+                weather_data[Date][Time]['풍속(동서성분)'] = item['fcstValue']
             # 풍속(남북성분)
             if item['category'] == 'VVV':
-                weather_data[Date][Time]['vvv'] = item['fcstValue']
+                weather_data[Date][Time]['풍속(남북성분)'] = item['fcstValue']
             # 파고
             if item['category'] == 'WAV':
-                weather_data[Date][Time]['wav'] = item['fcstValue']
+                weather_data[Date][Time]['파고'] = item['fcstValue']
             # 풍향
             if item['category'] == 'VEC':
-                weather_data[Date][Time]['vec'] = item['fcstValue']
+                weather_data[Date][Time]['풍향'] = item['fcstValue']
             # 풍속
             if item['category'] == 'WSD':
-                weather_data[Date][Time]['wsd'] = item['fcstValue']
+                weather_data[Date][Time]['풍속'] = item['fcstValue']
             
         print("response: ", weather_data)
+
+
 class db_Logic:
     def __init__(self) -> None:
         pass
+
 
 def main():
     weatherlogic = weather_Logic()
