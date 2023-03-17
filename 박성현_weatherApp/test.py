@@ -7,7 +7,7 @@ from mysql.connector import Error
 import pandas as pd
 import json
 import pymysql 
-
+CODE_INFO = ['POP', 'PTY', ]
 API_TIME = [2, 5, 8, 11, 14, 17, 20, 23]
 API_MINUTE = 10
 
@@ -167,7 +167,7 @@ class weather_Logic:
         value_List = []
         for Date in weather_data:
             for Time in weather_data[Date]:
-                print(list(weather_data[Date][Time]))
+                print(weather_data[Date][Time])
  
 
         # conn = pymysql.connect(
