@@ -8,7 +8,7 @@ from urllib.request import *
 from urllib.parse import *  # 한글을 URLencode 변환하는 함수
 from mysql.connector import *
 
-CODE_INFO = ['POP', 'PTY', 'PCP', 'REH', 'SNO', 'SKY', 'TMP', 'TMN', 'TMM', 'UUU', 'VVV', 'WAV', 'VEC', 'WSD']
+CODE_INFO = ['TMP','UUU','VVV','VEC','WSD','SKY','PTY','POP','WAV','PCP','REH','SNO','TMN', 'TMX'  ]
 API_TIME = [2, 5, 8, 11, 14, 17, 20, 23]
 API_MINUTE = 10
 
@@ -35,13 +35,23 @@ class weather_Logic:
             y_time = str(API_TIME[7]) + str(API_MINUTE)
 
             if now.hour is API_TIME[time] and now.minute >= API_MINUTE:
-                base_date = today
-                base_time = now_time
-                break
+                if now.hour < 10:
+                    base_date = today
+                    base_time = '0' + now_time
+                    break
+                else:
+                    base_date = today
+                    base_time = now_time
+                    break
             elif API_TIME[time - 1] < now.hour <= API_TIME[time]:
-                base_date = today
-                base_time = pre_time
-                break
+                if now.hour < 10:
+                    base_date = today
+                    base_time = '0' + pre_time
+                    break 
+                else:
+                    base_date = today
+                    base_time = '0' + pre_time
+                    break
             elif now.hour < API_TIME[0]:
                 base_date = yesterday
                 base_time = y_time
@@ -75,25 +85,90 @@ class weather_Logic:
 
         ITEM = json_data['response']['body']['items']['item']
 
-        list_data = []
-        list_info = []  # 2차원 배열
+        list_data = []  # 1차원 배열
+        list_data_detail = []  # 2차원 배열
         # 2차원 배열로 단기예보 항목명, 날짜, 시간 별로 구분
-        for i in range(len(ITEM)):
-            list_info_data = [] # 1차원 배열
-            for j in range(len(CODE_INFO)):
+        code_num = 0
+        list_data_num = 0
+
+        # DB 연결
+        conn = pymysql.connect(
+            host = '127.0.0.1', 	 #ex) '127.0.0.1' "210.119.12.66"
+            port = 3306,
+            user = "root", 		 #ex) root
+            password = "12345",
+            database = "miniproject01", 
+            charset = 'utf8'
+        )
+        # Cursor Object 가져오기
+        cur = conn.cursor()
+        # 쿼리 초기화(임시)
+        query = '''DELETE FROM `miniproject01`.`weather`'''
+        cur.execute(query)
+        get_index_result = f'SELECT * FROM weather;'
+        cur.execute(get_index_result)
+        
+        set_TMP_result = f'INSERT INTO weather (fcstDate, fcstTime, TMP, UUU, VVV, VEC, WSD, SKY, PTY, POP, WAV, PCP, REH, SNO) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        set_TMN_result = f'INSERT INTO weather (fcstDate, fcstTime, TMP, UUU, VVV, VEC, WSD, SKY, PTY, POP, WAV, PCP, REH, SNO, TMN) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        set_TMX_result = f'INSERT INTO weather (fcstDate, fcstTime, TMP, UUU, VVV, VEC, WSD, SKY, PTY, POP, WAV, PCP, REH, SNO, TMX) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        
+        try:
+            for i in range(len(ITEM)):
                 # 정해진 순서대로 카테고리 값이 같다면
-                if ITEM[i]['category'] == str(CODE_INFO[j]):
+                if ITEM[i]['category'] == str(CODE_INFO[code_num]):
                     # 2차원 배열에 카테고리, 날짜, 시간 추가
-                    list_info_data.append(ITEM[i]['category'])
-                    list_info_data.append(ITEM[i]['fcstDate'])
-                    list_info_data.append(ITEM[i]['fcstTime'])
+                    # 만약 list_info[]에 데이터가 없다면
+                    if code_num >= len(CODE_INFO):
+                        code_num = 0
+                    # data 리스트가 비어있다면 날짜 시간 값 추가
+                    elif list_data == [] :
+                        list_data.append(ITEM[i]['fcstDate'])
+                        list_data.append(ITEM[i]['fcstTime'])
+                        list_data.append(ITEM[i]['fcstValue'])
+                        code_num += 1
+                    # TMN가 수서대로 나왔을 경우
+                    elif ITEM[i]['category'] == 'TMN':
+                        list_data.append(ITEM[i]['fcstValue'])
+                        list_data_detail.append(list_data)
+                        cur.execute(set_TMN_result, (list_data))
+                        list_data = []
+                        code_num = 0
+                    # 날짜랑 시간이 같다면 값 추가
+                    elif ITEM[i]['fcstDate'] == list_data[0] and ITEM[i]['fcstTime'] == list_data[1]:
+                        list_data.append(ITEM[i]['fcstValue'])
+                        code_num += 1
+                # 카테고리 값이 정해진 순서대로 안나왔을 경우
+                elif ITEM[i]['category'] != str(CODE_INFO[code_num]):
+                    # TMN을 뛰어넘고 TMX가 나왔을 경우
+                    if ITEM[i]['category'] == 'TMX':
+                        list_data.append(ITEM[i]['fcstValue'])
+                        list_data_detail.append(list_data)
+                        cur.execute(set_TMX_result, (list_data))
+                        list_data = [] 
+                        code_num = 0
+                    # TMN, TMX가 나오지않고 건너 뛰었을 경우
+                    elif ITEM[i]['category'] == 'TMP':
+                        list_data_detail.append(list_data)
+                        cur.execute(set_TMP_result, (list_data))
+                        list_data = []
+                        list_data.append(ITEM[i]['fcstDate'])
+                        list_data.append(ITEM[i]['fcstTime'])
+                        list_data.append(ITEM[i]['fcstValue'])
+                        code_num = 1   
                     # 데이터 값 리스트에 저장
-                    list_data.append(ITEM[i]['fcstValue'])
+                    # 만약 list_info의 [i]번째 리스트 'fcstDate', 'fcstTime'가 같다면 append
                 else:
-                    j += 1
-            list_info.append(list_info_data)
-            i += 1
-        return list_info, list_data
+                    i += 1
+        except Exception as e:
+            print(e)
+
+        conn.commit()
+
+        # 결과 가져오기
+        print(cur.fetchall())
+        conn.close()
+        print('저장')
+
 
     def Ultra_short_term_checkDate(self):
         # 현재 시간
@@ -123,7 +198,7 @@ class weather_Logic:
             base_date = today
         return base_date, base_time
     # 리스트로 바뀐 데이터 데이터 베이스에 올려주는 함수    
-    def db_data_weather(self, list_info, list_data):
+    def db_data_weather(self, list_data_detail):
         list_data_num = 0
 
         conn = pymysql.connect(
@@ -137,16 +212,17 @@ class weather_Logic:
         # Cursor Object 가져오기
         cur = conn.cursor()
         # 쿼리 초기화(임시)
-        query = '''DELETE FROM weather'''
+        query = '''DELETE FROM `miniproject01`.`weather`'''
         cur.execute(query)
         # DB 불러오기
 
         # 데이터 갯수만큼 돌면서 날짜, 시간, 데이터 형태 읽고 DB에 등록
-        for item in range(len(CODE_INFO)):
-            get_index_result = f'SELECT fcstDate, fcstTime, {CODE_INFO[item]} FROM weather'
-            set_index_result = f'INSERT INTO weather (fcstDate, fcstTime, {CODE_INFO[item]}) VALUES ({list_info[0][1]}, {list_info[0][2]}, {list_data[list_data_num]})'
-            set_index_date_result = f'INSERT INTO weather (fcstTime, {CODE_INFO[item]}) VALUES ({list_info[0][2]}, {list_data[list_data_num]})'
-            update_index_result = f'UPDATE weather SET {CODE_INFO[item]} = ({list_data[list_data_num]})'
+
+        for  item in range(len(CODE_INFO)):
+            get_index_result = f'SELECT fcstDate, fcstTime, {CODE_INFO[item]} FROM weather;'
+            set_index_result = f'INSERT INTO weather (fcstDate, fcstTime, {CODE_INFO[item]}) VALUES ({list_data_detail[0][0]}, {list_data_detail[0][1]}, {list_data_detail[list_data_num]});'
+            set_index_date_result = f'INSERT INTO weather (fcstTime, {CODE_INFO[item]}) VALUES ({list_data_detail[0][1]}, {list_data_detail[list_data_num]});'
+            update_index_result = f'UPDATE weather SET {CODE_INFO[item]} = ({list_data_detail[list_data_num]});'
             
             cur.execute(get_index_result)
             row = cur.fetchall()
@@ -156,13 +232,13 @@ class weather_Logic:
                 if row == ():
                     cur.execute(set_index_result)
                     list_data_num += 1
-                elif row['fcstDate'] == '' and row['fcstTime'] == '':
+                elif row[list_data_num][0] == '' and row[list_data_num][1] == '':
                     cur.execute(set_index_result)
                     list_data_num += 1
-                elif row['fcstDate'] != '' and row['fcstTime'] == '':
+                elif row[list_data_num][0] != '' and row[list_data_num][1] == '':
                     cur.execute(set_index_date_result)
                     list_data_num += 1
-                elif row['fcstDate'] != '' and row['fcstTime'] != '' and row[f'{CODE_INFO[item]}'] == '':
+                elif row[list_data_num][0] != '' and row[list_data_num][1] != '' and row[f'{CODE_INFO[item]}'] == '':
                     cur.execute(update_index_result)
                     list_data_num += 1
 
@@ -178,8 +254,7 @@ class weather_Logic:
 
 def main():
     weatherlogic = weather_Logic()
-    list_info, list_data = weatherlogic.Short_term_checkDate()
-    weatherlogic.db_data_weather(list_info, list_data)
+    weatherlogic.Short_term_checkDate()
 
 if __name__ == '__main__':
     main()
