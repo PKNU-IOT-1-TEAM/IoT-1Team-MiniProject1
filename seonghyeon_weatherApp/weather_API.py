@@ -1,19 +1,20 @@
 import requests # 기본적인 URL 모듈로는 안되서 대체
-import pandas as pd
 import json
 import pymysql 
 import urllib3
+import sys
 from datetime import *
 from urllib.request import *
 from urllib.parse import *  # 한글을 URLencode 변환하는 함수
 from mysql.connector import *
+
 
 CODE_INFO = ['TMP','UUU','VVV','VEC','WSD','SKY','PTY','POP','WAV','PCP','REH','SNO','TMN', 'TMX'  ]
 API_TIME = [2, 5, 8, 11, 14, 17, 20, 23]
 API_MINUTE = 10
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
+# 단기 예보 API 불러오기 및 DB업로드 클래스
 class weather_Logic:
         
     def __init__(self) -> None:
@@ -161,89 +162,6 @@ class weather_Logic:
                     i += 1
         except Exception as e:
             print(e)
-
-        conn.commit()
-
-        # 결과 가져오기
-        print(cur.fetchall())
-        conn.close()
-        print('저장')
-
-
-    def Ultra_short_term_checkDate(self):
-        # 현재 시간
-        now = datetime.now()
-        # 포맷 변경
-        today = datetime.today().strftime("%Y%m%d")
-        # 어제는 오늘 값에 -1
-        y = date.today() - timedelta(days=1)
-        
-        yesterday = y.strftime("%Y%m%d")
-        if now.minute < 45: # base_time와 base_date 구하는 함수
-            if now.hour == 0:
-                base_time = "2330"
-                base_date = yesterday
-            else:
-                pre_hour = now.hour-1
-                if pre_hour<10:
-                    base_time = "0" + str(pre_hour) + "30"
-                else:
-                    base_time = str(pre_hour) + "30"
-                base_date = today
-        else:
-            if now.hour < 10:
-                base_time = "0" + str(now.hour) + "30"
-            else:
-                base_time = str(now.hour) + "30"
-            base_date = today
-        return base_date, base_time
-    # 리스트로 바뀐 데이터 데이터 베이스에 올려주는 함수    
-    def db_data_weather(self, list_data_detail):
-        list_data_num = 0
-
-        conn = pymysql.connect(
-            host = '127.0.0.1', 	 #ex) '127.0.0.1' "210.119.12.66"
-            port = 3306,
-            user = "root", 		 #ex) root
-            password = "12345",
-            database = "miniproject01", 
-            charset = 'utf8'
-        )
-        # Cursor Object 가져오기
-        cur = conn.cursor()
-        # 쿼리 초기화(임시)
-        query = '''DELETE FROM `miniproject01`.`weather`'''
-        cur.execute(query)
-        # DB 불러오기
-
-        # 데이터 갯수만큼 돌면서 날짜, 시간, 데이터 형태 읽고 DB에 등록
-
-        for  item in range(len(CODE_INFO)):
-            get_index_result = f'SELECT fcstDate, fcstTime, {CODE_INFO[item]} FROM weather;'
-            set_index_result = f'INSERT INTO weather (fcstDate, fcstTime, {CODE_INFO[item]}) VALUES ({list_data_detail[0][0]}, {list_data_detail[0][1]}, {list_data_detail[list_data_num]});'
-            set_index_date_result = f'INSERT INTO weather (fcstTime, {CODE_INFO[item]}) VALUES ({list_data_detail[0][1]}, {list_data_detail[list_data_num]});'
-            update_index_result = f'UPDATE weather SET {CODE_INFO[item]} = ({list_data_detail[list_data_num]});'
-            
-            cur.execute(get_index_result)
-            row = cur.fetchall()
-            print(row)
-
-            try:
-                if row == ():
-                    cur.execute(set_index_result)
-                    list_data_num += 1
-                elif row[list_data_num][0] == '' and row[list_data_num][1] == '':
-                    cur.execute(set_index_result)
-                    list_data_num += 1
-                elif row[list_data_num][0] != '' and row[list_data_num][1] == '':
-                    cur.execute(set_index_date_result)
-                    list_data_num += 1
-                elif row[list_data_num][0] != '' and row[list_data_num][1] != '' and row[f'{CODE_INFO[item]}'] == '':
-                    cur.execute(update_index_result)
-                    list_data_num += 1
-
-            except Exception as e:
-                print(e)
 
         conn.commit()
 
