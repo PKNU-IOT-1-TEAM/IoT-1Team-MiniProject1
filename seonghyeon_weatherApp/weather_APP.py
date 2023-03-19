@@ -11,6 +11,8 @@ today = datetime.today().strftime("%Y%m%d") # 특수문자 제거
 tomorrow = (date.today() + timedelta(days=1)).strftime("%Y%m%d")
 day_after_tomorrow = (date.today() + timedelta(days=2)).strftime("%Y%m%d")
 
+select_data_list = ('fcstDate', 'fcstTime', 'POP', 'PTY', 'REH', 'SKY', 'TMP', 'WSD')
+
 class MainWindow(QtWidgets.QMainWindow):
 
 
@@ -35,18 +37,14 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         cur = con.cursor()
 
-        get_index_result = f'''SELECT DISTINCT fcstDate, 
-                                               fcstTime, 
-                                               POP, 
-                                               PTY, 
-                                               REH, 
-                                               SKY, 
-                                               TMP, 
-                                               WSD 
+        get_index_result = f'''SELECT DISTINCT {select_data_list} 
                                  FROM weather 
                                 WHERE (fcstDate = {today} and fcstTime = 1200) 
                                    or (fcstDate = {tomorrow} and fcstTime = 1200) 
                                    or (fcstDate = {day_after_tomorrow} and fcstTime = 1200);'''
+        
+        for item in select_data_list:
+            
         cur.execute(get_index_result)
         print(cur.fetchall())
         con.close()
