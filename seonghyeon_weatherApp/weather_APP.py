@@ -1,27 +1,63 @@
-import sys
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5 import uic
+import pyqtgraph as pg
+import sys  # We need sys so that we can pass argv to QApplication
+import os
+import pymysql
+
+from PyQt5 import QtWidgets, uic
+from pyqtgraph import PlotWidget, plot
+from datetime import *
+
+today = datetime.today().strftime("%Y%m%d") # 특수문자 제거
+tomorrow = (date.today() + timedelta(days=1)).strftime("%Y%m%d")
+day_after_tomorrow = (date.today() + timedelta(days=2)).strftime("%Y%m%d")
+
+class MainWindow(QtWidgets.QMainWindow):
 
 
-form_class = uic.loadUiType("./IoT-1Team-MiniProject1/박성현_weatherApp/weatherApp.ui")[0]
+    def __init__(self, *args, **kwargs):    
+        super(MainWindow, self).__init__(*args, **kwargs)
+        #Load the UI Page
+        uic.loadUi('./seonghyeon_weatherApp/weatherApp.ui', self)
+        self.plot([1,2,3,4,5,6,7,8,9,10], [30,32,34,32,33,31,29,32,35,45])
 
-class MyWindow(QMainWindow, form_class):
 
-    def __init__(self):
-        super().__init__()
-        self.setupUi(self)
-        y = [4, 7, 9,10]
-        self.graphicsView.addLegend(size=(140, 40)) ## 범례
-        self.graphicsView.plot(y, title='Plot test', name='Legend name', pen='r', symbol='o', symbolPen='g', symbolBrush=0.2)
-        self.graphicsView.showGrid(x=True, y=True) #그리드 표현
-        self.graphicsView.setTitle(title='Title name')
+    def plot(self, hour, temperature):
+        self.graphWidget.plot(hour, temperature)
+
+    def initDB(self):
+        con = pymysql.connect(
+            host = '127.0.0.1', 	 #ex) '127.0.0.1' "210.119.12.66"
+            port = 3306,
+            user = "root", 		 #ex) root
+            password = "12345",
+            database = "miniproject01", 
+            charset = 'utf8'
+        )
+        cur = con.cursor()
+
+        get_index_result = f'''SELECT DISTINCT fcstDate, 
+                                               fcstTime, 
+                                               POP, 
+                                               PTY, 
+                                               REH, 
+                                               SKY, 
+                                               TMP, 
+                                               WSD 
+                                 FROM weather 
+                                WHERE (fcstDate = {today} and fcstTime = 1200) 
+                                   or (fcstDate = {tomorrow} and fcstTime = 1200) 
+                                   or (fcstDate = {day_after_tomorrow} and fcstTime = 1200);'''
+        cur.execute(get_index_result)
+        print(cur.fetchall())
+        con.close()
 
 def main():
-    app = QApplication(sys.argv)
-    myWindow = MyWindow()
-    myWindow.show()
-    app.exec_()
+    MainWindow.initDB(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
+    main = MainWindow()
+    main.show()
+    sys.exit(app.exec_())
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
+

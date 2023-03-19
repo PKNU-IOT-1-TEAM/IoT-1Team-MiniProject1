@@ -2,7 +2,7 @@ import requests # 기본적인 URL 모듈로는 안되서 대체
 import json
 import pymysql 
 import urllib3
-import sys
+
 from datetime import *
 from urllib.request import *
 from urllib.parse import *  # 한글을 URLencode 변환하는 함수
@@ -90,7 +90,6 @@ class weather_Logic:
         list_data_detail = []  # 2차원 배열
         # 2차원 배열로 단기예보 항목명, 날짜, 시간 별로 구분
         code_num = 0
-        list_data_num = 0
 
         # DB 연결
         conn = pymysql.connect(
