@@ -6,10 +6,13 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from pyqtgraph import *
+import weather_API
 
 today = datetime.today().strftime("%Y%m%d") # 특수문자 제거
 tomorrow = (date.today() + timedelta(days=1)).strftime("%Y%m%d")
 day_after_tomorrow = (date.today() + timedelta(days=2)).strftime("%Y%m%d")
+
+now = datetime.now() # 오늘 시간
 
 select_data_list = ['fcstDate', 'fcstTime', 'POP', 'PTY', 'REH', 'SKY', 'TMP', 'WSD']
 Date_list = [today, tomorrow, day_after_tomorrow]
@@ -50,6 +53,12 @@ class MainWindow(QMainWindow):
         
     def initDB(self):
         global weather_list
+
+        if now.hour < 10:
+            result_hour = '1200'
+        else:
+            result_hour = str(now.hour + 1) + '00'
+
         con = pymysql.connect(
             host = '210.119.12.66', 	 #ex) '127.0.0.1' "210.119.12.66"
             port = 3306,
@@ -62,18 +71,20 @@ class MainWindow(QMainWindow):
 
         # 데이터 베이스에 접근해서 정해진 조건으로 검색해서 가져오기
 
-        get_index_result = f'''SELECT fcstDate, fcstTime, POP, PTY, REH, SKY, TMP, WSD
+        get_index_result = f'''SELECT fcstDate, fcstTime, REH, PTY, TMP, VEC, WSD, POP
                                  FROM parkseonghyeon
-                                WHERE (fcstDate = {today} and fcstTime = 1200) 
-                                   or (fcstDate = {tomorrow} and fcstTime = 1200) 
-                                   or (fcstDate = {day_after_tomorrow} and fcstTime = 1200);'''
+                                WHERE (fcstDate = {today} and fcstTime = {result_hour}) 
+                                   or (fcstDate = {tomorrow} and fcstTime = {result_hour}) 
+                                   or (fcstDate = {day_after_tomorrow} and fcstTime = {result_hour});'''
         cur.execute(get_index_result)
         unit = cur.fetchall()
         weather_list = unit
+        print(unit)
         con.close()
 
 
 def main():
+    weather_API.main()
     MainWindow.initDB(sys.argv)
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()

@@ -51,7 +51,7 @@ class weather_Logic:
                     break 
                 else:
                     base_date = today
-                    base_time = '0' + pre_time
+                    base_time = pre_time
                     break
             elif now.hour < API_TIME[0]:
                 base_date = yesterday
