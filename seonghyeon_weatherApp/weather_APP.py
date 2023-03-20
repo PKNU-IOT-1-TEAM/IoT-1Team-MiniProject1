@@ -20,15 +20,15 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__(*args, **kwargs)
         #Load the UI Page
         uic.loadUi('./seonghyeon_weatherApp/weatherApp.ui')
-        self.plot([1,2,3,4,5,6,7,8,9,10], [30,32,34,32,33,31,29,32,35,45])
+    #     self.plot([1,2,3,4,5,6,7,8,9,10], [30,32,34,32,33,31,29,32,35,45])
 
 
-    def plot(self, hour, temperature):
-        self.graphWidget.plot(hour, temperature)
+    # def plot(self, hour, temperature):
+    #     self.graphWidget.plot(hour, temperature)
 
     def initDB(self):
         con = pymysql.connect(
-            host = '127.0.0.1', 	 #ex) '127.0.0.1' "210.119.12.66"
+            host = '210.119.12.66', 	 #ex) '127.0.0.1' "210.119.12.66"
             port = 3306,
             user = "root", 		 #ex) root
             password = "12345",
@@ -39,14 +39,16 @@ class MainWindow(QtWidgets.QMainWindow):
         item_list = []
         for item in range(len(select_data_list)):
             get_index_result = f'''SELECT {select_data_list[item]} 
-                                     FROM weather 
+                                     FROM parkseonghyeon
                                     WHERE (fcstDate = {today} and fcstTime = 1200) 
                                        or (fcstDate = {tomorrow} and fcstTime = 1200) 
                                        or (fcstDate = {day_after_tomorrow} and fcstTime = 1200);'''
+            
             item_list.append(cur.execute(get_index_result))
             print(cur.fetchall())
         con.close()
         print(item_list)
+
 def main():
     MainWindow.initDB(sys.argv)
     app = QtWidgets.QApplication(sys.argv)

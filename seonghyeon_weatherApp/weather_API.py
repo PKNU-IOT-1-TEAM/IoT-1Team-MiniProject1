@@ -93,7 +93,7 @@ class weather_Logic:
 
         # DB 연결
         conn = pymysql.connect(
-            host = '127.0.0.1', 	 #ex) '127.0.0.1' "210.119.12.66"
+            host = '210.119.12.66', 	 #ex) '127.0.0.1' "210.119.12.66"
             port = 3306,
             user = "root", 		 #ex) root
             password = "12345",
@@ -103,14 +103,14 @@ class weather_Logic:
         # Cursor Object 가져오기
         cur = conn.cursor()
         # 쿼리 초기화(임시)
-        query = '''DELETE FROM `miniproject01`.`weather`'''
+        query = '''DELETE FROM parkseonghyeon``'''
         cur.execute(query)
-        get_index_result = f'SELECT * FROM weather;'
+        get_index_result = f'SELECT * FROM parkseonghyeon;'
         cur.execute(get_index_result)
         
-        set_TMP_result = f'INSERT INTO weather (fcstDate, fcstTime, TMP, UUU, VVV, VEC, WSD, SKY, PTY, POP, WAV, PCP, REH, SNO) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
-        set_TMN_result = f'INSERT INTO weather (fcstDate, fcstTime, TMP, UUU, VVV, VEC, WSD, SKY, PTY, POP, WAV, PCP, REH, SNO, TMN) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
-        set_TMX_result = f'INSERT INTO weather (fcstDate, fcstTime, TMP, UUU, VVV, VEC, WSD, SKY, PTY, POP, WAV, PCP, REH, SNO, TMX) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        set_TMP_result = f'INSERT INTO parkseonghyeon (fcstDate, fcstTime, TMP, UUU, VVV, VEC, WSD, SKY, PTY, POP, WAV, PCP, REH, SNO) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        set_TMN_result = f'INSERT INTO parkseonghyeon (fcstDate, fcstTime, TMP, UUU, VVV, VEC, WSD, SKY, PTY, POP, WAV, PCP, REH, SNO, TMN) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        set_TMX_result = f'INSERT INTO parkseonghyeon (fcstDate, fcstTime, TMP, UUU, VVV, VEC, WSD, SKY, PTY, POP, WAV, PCP, REH, SNO, TMX) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
         
         try:
             for i in range(len(ITEM)):
