@@ -37,17 +37,19 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         cur = con.cursor()
         item_list = []
+        # 데이터 베이스에 접근해서 정해진 조건으로 검색해서 가져오기
         for item in range(len(select_data_list)):
             get_index_result = f'''SELECT {select_data_list[item]} 
                                      FROM parkseonghyeon
                                     WHERE (fcstDate = {today} and fcstTime = 1200) 
                                        or (fcstDate = {tomorrow} and fcstTime = 1200) 
                                        or (fcstDate = {day_after_tomorrow} and fcstTime = 1200);'''
-            
-            item_list.append(cur.execute(get_index_result))
-            print(cur.fetchall())
+
+            cur.execute(get_index_result)
+            unit = cur.fetchall()
+            print(unit[1][0])
+
         con.close()
-        print(item_list)
 
 def main():
     MainWindow.initDB(sys.argv)

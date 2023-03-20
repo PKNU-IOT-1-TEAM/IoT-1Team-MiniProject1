@@ -152,7 +152,7 @@ class weather_Logic:
                         cur.execute(set_TMP_result, (list_data))
                         list_data = []
                         list_data.append(ITEM[i]['fcstDate'])
-                        list_data.append(ITEM[i]['fcstTime'])
+                        list_data.append(ITEM[i]['fcstTime']) 
                         list_data.append(ITEM[i]['fcstValue'])
                         code_num = 1   
                     # 데이터 값 리스트에 저장
