@@ -8,11 +8,13 @@ from urllib.request import *
 from urllib.parse import *  # 한글을 URLencode 변환하는 함수
 from mysql.connector import *
 
-
+# API에서 제공하는 데이터 순서
 CODE_INFO = ['TMP','UUU','VVV','VEC','WSD','SKY','PTY','POP','WAV','PCP','REH','SNO','TMN', 'TMX'  ]
+# API 데이터가 갱신되는 기준 시간
 API_TIME = [2, 5, 8, 11, 14, 17, 20, 23]
+# API 데이터는 10분에 업데이트 해준다.
 API_MINUTE = 10
-
+# 오류 안띄우기
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # 단기 예보 API 불러오기 및 DB업로드 클래스
 class weather_Logic:
@@ -29,39 +31,58 @@ class weather_Logic:
         now = datetime.now() # 오늘 시간
         today = datetime.today().strftime("%Y%m%d") # 특수문자 제거
         yesterday = (date.today() - timedelta(days=1)).strftime("%Y%m%d") # 어제 날짜
-
+        # API 제공 시간 횟수만큼 반복
         for time in range(len(API_TIME)):
             now_time = str(API_TIME[time]) + str(API_MINUTE) # 현재와 제일 가까운 시간
             pre_time = str(API_TIME[time - 1]) + str(API_MINUTE) # 이전 시간 - 발표 시간 시간 사이에 끼어있는 애매한 시간
-            y_time = str(API_TIME[7]) + str(API_MINUTE)
-
+            y_time = str(API_TIME[7]) + str(API_MINUTE) # 전날 마지막 시간
+            # 지금 시간이 시간 API_TIME 원소랑 같고 10분보다 크거나 같을 경우
             if now.hour is API_TIME[time] and now.minute >= API_MINUTE:
+                # 10시보다 작을 경우
                 if now.hour < 10:
+                    # 업데이트 기준 날짜는 오늘
                     base_date = today
+                    # 시간이 3자리라서 0이 앞에 붙어줘야한다.
                     base_time = '0' + now_time
+                    # 날짜 시간 지정해주고 반복문 탈출
                     break
-                else:
+                else: # 10시보다 큰 경우
+                    # 업데이트 기준 날짜는 오늘
                     base_date = today
+                    # 시간은 지금 시간
                     base_time = now_time
+                    # 날짜 시간 지정해주고 반복문 탈출
                     break
+            # 시간과 시간 사이에 끼어있는 애매한 시간일 경우
             elif API_TIME[time - 1] < now.hour <= API_TIME[time]:
+                # 시간이 10시보다 작을 경우
                 if now.hour < 10:
+                    # 업데이트 기준 날짜는 오늘
                     base_date = today
+                    # 시간이 3자리라서 0이 앞에 붙어줘야한다.
                     base_time = '0' + pre_time
+                    # 날짜 시간 지정해주고 반복문 탈출
                     break 
+                # 시간이 10시 보다 클 경우
                 else:
+                    # 업데이트 기준 날짜는 오늘
                     base_date = today
+                    # 시간은 지금 시간
                     base_time = pre_time
+                    # 날짜 시간 지정해주고 반복문 탈출
                     break
+            # 시간이 2시보다 작을 경우
             elif now.hour < API_TIME[0]:
+                # 업데이트 기준 날짜는 어제(아직 오늘껀 발표 안났으니까)
                 base_date = yesterday
+                # 시간은 어제 기준
                 base_time = y_time
+                # 날짜 시간 지정해주고 반복문 탈출
                 break
             else:
                 time += 1
 
         # 고정값인 페이지 주소 + 특수 키
-
         api_url = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst'
         # 여까지는 일반적인 URL
         # urlencode() url을 인코딩해서 특수문자 변환해줌
@@ -82,10 +103,15 @@ class weather_Logic:
         total_url = api_url + queryString
         # SSL 문제 때문에 계속 에러나서 진행이 안됐음
         response = requests.get(total_url, verify=False)
+        # json을 읽어와서 텍스트 형식으로 json_data에 대입
         json_data = json.loads(response.text)
-
+        # 딕셔너리로 json을 옮겨왔기 때문에 
+        # response value 값인 
+        # body 안에 있는 value 값인
+        # items 안에 있는 value 값인
+        # item 안에 있는 value 값에 접근
         ITEM = json_data['response']['body']['items']['item']
-
+        
         list_data = []  # 1차원 배열
         list_data_detail = []  # 2차원 배열
         # 2차원 배열로 단기예보 항목명, 날짜, 시간 별로 구분
@@ -93,9 +119,9 @@ class weather_Logic:
 
         # DB 연결
         conn = pymysql.connect(
-            host = '210.119.12.66', 	 #ex) '127.0.0.1' "210.119.12.66"
+            host = '210.119.12.66', 	 # ex) '127.0.0.1' "210.119.12.66"
             port = 3306,
-            user = "root", 		 #ex) root
+            user = "root", 		 # ex) root
             password = "12345",
             database = "miniproject01", 
             charset = 'utf8'
