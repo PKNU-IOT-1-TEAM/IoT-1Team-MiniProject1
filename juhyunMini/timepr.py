@@ -2,12 +2,7 @@
 import schedule
 import time
 
-def sum():
-    print('메롱')
+from datetime import datetime as dt
 
-schedule.every().day.at("21:32").do(sum)
-
-while True:
-        schedule.run_pending()
-
+dt.date()
     
