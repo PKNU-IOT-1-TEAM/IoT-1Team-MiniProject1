@@ -22,8 +22,8 @@ class FcstDB:
         if mode == 2:
              allFcstData = self.newData(2, setDate[0], setDate[1])
         # DB
-        conn = pymysql.connect(host='210.119.12.66', user = 'root', password='12345',
-                            db = 'miniproject01', charset='utf8', cursorclass=pymysql.cursors.DictCursor)
+        conn = pymysql.connect(host='localhost', user = 'root', password='12345',
+                               db = 'miniproject', charset='utf8')
         cur = conn.cursor()    # Connection으로부터 Cursor 생성
         query = '''SELECT Idx, fcstDate, fcstTime
                      FROM weather'''
@@ -90,11 +90,11 @@ class FcstDB:
 
     def insertDB(self, mode):
         # 주현집 host
-        # conn = pymysql.connect(host='localhost', user = 'root', password='12345',
-        #                        db = 'miniproject', charset='utf8')
+        conn = pymysql.connect(host='localhost', user = 'root', password='12345',
+                               db = 'miniproject', charset='utf8')
         # 성현DB
-        conn = pymysql.connect(host='210.119.12.66', user = 'root', password='12345',
-                            db = 'miniproject01', charset='utf8')
+        # conn = pymysql.connect(host='210.119.12.66', user = 'root', password='12345',
+        #                     db = 'miniproject01', charset='utf8')
         cur = conn.cursor()    # Connection으로부터 Cursor 생성
 
         query = '''TRUNCATE weather'''
@@ -146,8 +146,9 @@ class FcstDB:
         fcstData = dict()
         allFcstData = []
         CATEGORY = ['TMP', 'VEC', 'WSD', 'SKY', 'PTY', 'POP', 'PCP', 'REH', 'SNO', 'TMN', 'TMM']
-
+        # print(newFcstData)
         for item in newFcstData:
+            print(item['fcstDate'], item['fcstTime'])
             del item['baseDate'], item['baseTime'], item['nx'], item['ny']
 
             for category in CATEGORY:           
@@ -163,10 +164,11 @@ class FcstDB:
                 allFcstData.append(fcstData)
                 fcstData = dict()
                 fcstData = item
-        
-            changeDate = item['fcstDate']
-            changeTime = item['fcstTime']
+                changeDate = item['fcstDate']
+                changeTime = item['fcstTime']
 
+        allFcstData.append(fcstData)
+        # print(allFcstData)
         return allFcstData
     
 if __name__ == '__main__':
