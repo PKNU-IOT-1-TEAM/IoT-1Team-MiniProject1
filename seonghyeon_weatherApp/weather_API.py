@@ -130,10 +130,13 @@ class weather_Logic:
         cur = conn.cursor()
         # 쿼리 초기화(임시)
         query = '''DELETE FROM parkseonghyeon``'''
+        # 쿼리문 날리기
         cur.execute(query)
+        # 테이블 선택(임시)
         get_index_result = f'SELECT * FROM parkseonghyeon;'
+        # 쿼리문 날리기
         cur.execute(get_index_result)
-        
+        # TMP, TMN, TMX 별로 쿼리문 따로 짜기
         set_TMP_result = f'INSERT INTO parkseonghyeon (fcstDate, fcstTime, TMP, UUU, VVV, VEC, WSD, SKY, PTY, POP, WAV, PCP, REH, SNO) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
         set_TMN_result = f'INSERT INTO parkseonghyeon (fcstDate, fcstTime, TMP, UUU, VVV, VEC, WSD, SKY, PTY, POP, WAV, PCP, REH, SNO, TMN) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
         set_TMX_result = f'INSERT INTO parkseonghyeon (fcstDate, fcstTime, TMP, UUU, VVV, VEC, WSD, SKY, PTY, POP, WAV, PCP, REH, SNO, TMX) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
@@ -152,7 +155,7 @@ class weather_Logic:
                         list_data.append(ITEM[i]['fcstTime'])
                         list_data.append(ITEM[i]['fcstValue'])
                         code_num += 1
-                    # TMN가 수서대로 나왔을 경우
+                    # TMN가 순서대로 나왔을 경우
                     elif ITEM[i]['category'] == 'TMN':
                         list_data.append(ITEM[i]['fcstValue'])
                         list_data_detail.append(list_data)
