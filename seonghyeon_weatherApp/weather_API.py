@@ -119,7 +119,7 @@ class weather_Logic:
 
         # DB 연결
         conn = pymysql.connect(
-            host = '210.119.12.66', 	 # ex) '127.0.0.1' "210.119.12.66"
+            host = '127.0.0.1', 	 # ex) '127.0.0.1' "210.119.12.66"
             port = 3306,
             user = "root", 		 # ex) root
             password = "12345",
