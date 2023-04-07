@@ -43,12 +43,6 @@ Date_list = [today, tomorrow, day_after_tomorrow]
 # 리스트로 날씨를 받아올 거다.
 weather_list = []
 
-
-
-
-
-
-
 # 단기 예보 API 불러오기 및 DB업로드 클래스
 class weather_Logic:
         
