@@ -15,33 +15,24 @@ class qtApp(QMainWindow):
         self.initDB()
 
     def initDB(self):
-        conn = pymysql.connect(host='localhost', user = 'root', password='12345',
-                               db = 'miniproject', charset='utf8')
+        # conn = pymysql.connect(host='localhost', user = 'root', password='12345',
+        #                        db = 'miniproject', charset='utf8')
+        
+        # cursorclass=pymysql.cursors.DictCursor
+        
         # 성현DB
-        # conn = pymysql.connect(host='210.119.12.66', user = 'root', password='12345',
-        #                     db = 'miniproject01', charset='utf8')
+        conn = pymysql.connect(host='210.119.12.66', user = 'root', password='12345',
+                            db = 'miniproject01', charset='utf8', cursorclass=pymysql.cursors.DictCursor)
 
         cur = conn.cursor()
-        query = '''SELECT Idx
-	                    , fcstDate
-                        , fcstTime
-                        , TMP 
-                        , VEC 
-                        , WSD 
-                        , SKY 
-                        , PTY 
-                        , POP 
-                        , PCP 
-                        , REH 
-                        , SNO 
-                        , TMN 
-                        , TMM 
+        query = '''SELECT *
                      FROM weather'''      
+
         cur.execute(query)
         
         columns = cur.fetchall()
-        # print(rows)
-        self.makeTable(columns)
+        print(columns)
+        # self.makeTable(columns)
 
         conn.close()
 
