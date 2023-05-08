@@ -1,0 +1,32 @@
+﻿<mah:MetroWindow x:Class="getFludMarksData.ViewModels.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:local="clr-namespace:getFludMarksData.ViewModels"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800"
+        Loaded="MetroWindow_Loaded">
+    <Grid>
+        <DataGrid x:Name="DtgResult">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="일련번호" Binding="{Binding OBJT_ID}"/>
+                <DataGridTextColumn Header="침수심" Binding="{Binding FLUD_SHIM}"/>
+                <DataGridTextColumn Header="침수등급" Binding="{Binding FLUD_GD}"/>
+                <DataGridTextColumn Header="침수면적" Binding="{Binding FLUD_AR}"/>
+                <DataGridTextColumn Header="침수년도" Binding="{Binding FLUD_YEAR}"/>
+                <DataGridTextColumn Header="침수재해명" Binding="{Binding FLUD_NM}"/>
+                <DataGridTextColumn Header="침수원인상세명" Binding="{Binding FLUD_NM2}"/>
+                <DataGridTextColumn Header="침수시작년월일" Binding="{Binding SAT_DATE}"/>
+                <DataGridTextColumn Header="침수종료년월일" Binding="{Binding END_DATE}"/>
+                <DataGridTextColumn Header="침수시작시간" Binding="{Binding SAT_TM}"/>
+                <DataGridTextColumn Header="침수종료시간" Binding="{Binding END_TM}"/>
+                <DataGridTextColumn Header="시도코드" Binding="{Binding CTPRVN_CD}"/>
+                <DataGridTextColumn Header="시군구코드" Binding="{Binding SGG_CD}"/>
+                <DataGridTextColumn Header="읍면동코드" Binding="{Binding EMD_CD}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</mah:MetroWindow>
