@@ -11,9 +11,9 @@ namespace getFludMarksData.Models
     {
         public int Idx { get; set; }
         public int OBJT_ID { get; set; }
-        public float FLUD_SHIM { get; set; }
+        public double FLUD_SHIM { get; set; }
         public int FLUD_GD { get; set; }
-        public float FLUD_AR { get; set; }
+        public double FLUD_AR { get; set; }
         public string FLUD_YEAR { get; set; }
         public string FLUD_NM { get; set; }
         public string FLUD_NM2 { get; set; }
