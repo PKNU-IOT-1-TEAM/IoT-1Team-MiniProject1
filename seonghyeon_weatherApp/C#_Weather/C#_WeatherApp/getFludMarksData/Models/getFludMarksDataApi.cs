@@ -9,7 +9,7 @@ namespace getFludMarksData.Models
 {
     public class getFludMarksDataApi
     {
-        public int idx { get; set; }
+        public int Idx { get; set; }
         public int OBJT_ID { get; set; }
         public float FLUD_SHIM { get; set; }
         public int FLUD_GD { get; set; }
