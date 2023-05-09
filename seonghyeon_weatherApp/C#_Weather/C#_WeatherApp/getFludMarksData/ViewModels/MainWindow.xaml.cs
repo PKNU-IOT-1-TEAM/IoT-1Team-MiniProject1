@@ -9,6 +9,7 @@ using System.Data;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,10 +23,12 @@ namespace getFludMarksData.ViewModels
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        private static readonly string myKeyString = "BCJJ6H0U-BCJJ-BCJJ-BCJJ-BCJJ6H0UIV";
-        private static readonly int pageNum = 1;
-        private static readonly int numOfRows = 100;
-        private static readonly string type = "XML"; // XML 밖에 지원을 안하는 듯함.
+        private static string myKeyString = "BCJJ6H0U-BCJJ-BCJJ-BCJJ-BCJJ6H0UIV";
+        private static int pageNum = 1;
+        private static int maxPageNum = 26;
+        private static int maxNumOfRows = 25983;
+        private static int numOfRows = 25983;
+        private static string type = "XML"; // XML 밖에 지원을 안하는 듯함.
 
         private string insertQuery = $@"INSERT INTO miniproject01.getfludmarksdata
                                                (OBJT_ID,
@@ -62,64 +65,66 @@ namespace getFludMarksData.ViewModels
             InitializeComponent();
         }
 
-        public void InsertData(string query, List<string> add)
+        public void InsertData(string query, List<getFludMarksDataApi> FludMarksData)
         {
             using (MySqlConnection conn = new MySqlConnection(Commons.myConnString))
             {
                 if (conn.State == System.Data.ConnectionState.Closed) conn.Open();
-                MySqlCommand cmd = new MySqlCommand(query, conn);
-                foreach (char row in add[0])
+                foreach (getFludMarksDataApi row in FludMarksData.ToArray())
                 {
-                    cmd.Parameters.AddWithValue("@OBJT_ID", add[0]);
-                    cmd.Parameters.AddWithValue("@FLUD_SHIM", add[1]);
-                    cmd.Parameters.AddWithValue("@FLUD_GD", add[2]);
-                    cmd.Parameters.AddWithValue("@FLUD_AR", add[3]);
-                    cmd.Parameters.AddWithValue("@FLUD_YEAR", add[4]);
-                    cmd.Parameters.AddWithValue("@FLUD_NM", add[5]);
-                    cmd.Parameters.AddWithValue("@FLUD_NM2", add[6]);
-                    cmd.Parameters.AddWithValue("@SAT_DATE", add[7]);
-                    cmd.Parameters.AddWithValue("@END_DATE", add[8]);
-                    cmd.Parameters.AddWithValue("@SAT_TM", add[9]);
-                    cmd.Parameters.AddWithValue("@END_TM", add[10]);
-                    cmd.Parameters.AddWithValue("@CTPRVN_CD", add[11]);
-                    cmd.Parameters.AddWithValue("@SGG_CD", add[12]);
-                    cmd.Parameters.AddWithValue("@EMD_CD", add[13]);
+                    var item = row as getFludMarksDataApi;
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@OBJT_ID", item.OBJT_ID);
+                    cmd.Parameters.AddWithValue("@FLUD_SHIM", item.FLUD_SHIM);
+                    cmd.Parameters.AddWithValue("@FLUD_GD", item.FLUD_GD);
+                    cmd.Parameters.AddWithValue("@FLUD_AR", item.FLUD_AR);
+                    cmd.Parameters.AddWithValue("@FLUD_YEAR", item.FLUD_YEAR);
+                    cmd.Parameters.AddWithValue("@FLUD_NM", item.FLUD_NM);
+                    cmd.Parameters.AddWithValue("@FLUD_NM2", item.FLUD_NM2);
+                    cmd.Parameters.AddWithValue("@SAT_DATE", item.SAT_DATE);
+                    cmd.Parameters.AddWithValue("@END_DATE", item.END_DATE);
+                    cmd.Parameters.AddWithValue("@SAT_TM", item.SAT_TM);
+                    cmd.Parameters.AddWithValue("@END_TM", item.END_TM);
+                    cmd.Parameters.AddWithValue("@CTPRVN_CD", item.CTPRVN_CD);
+                    cmd.Parameters.AddWithValue("@SGG_CD", item.SGG_CD);
+                    cmd.Parameters.AddWithValue("@EMD_CD", item.EMD_CD);
+                    
+                    cmd.ExecuteNonQuery();
                 }
             }
         }
         // XML 파싱 & DB 저장
-        private async void SetNaverXmlParseing(String strXml)
+        private async void FludMarksDataXmlParseing(String strXml)
         {
-            var adds = new List<List<string>>();
-
             XmlDocument xml = new XmlDocument(); // XmlDocument 생성
             xml.LoadXml(strXml);
-            XmlNodeList fludMarksData = xml.GetElementsByTagName("item"); //접근할 노드
+            XmlNodeList FludMarksData = xml.GetElementsByTagName("item"); //접근할 노드
 
-            if (fludMarksData != null)
+            if (FludMarksData != null)
             {
-                foreach (XmlNode xn in fludMarksData)
+                var fludmarksdata = new List<getFludMarksDataApi>();
+
+                foreach (XmlNode xn in FludMarksData)
                 {
-                    List<string> add = new List<string>();
-
-                    add.Add(xn["OBJT_ID"].InnerText);
-                    add.Add(xn["FLUD_SHIM"].InnerText);
-                    add.Add(xn["FLUD_GD"].InnerText);
-                    add.Add(xn["FLUD_AR"].InnerText);
-                    add.Add(xn["FLUD_YEAR"].InnerText);
-                    add.Add(xn["FLUD_NM"].InnerText);
-                    add.Add(xn["FLUD_NM2"].InnerText);
-                    add.Add(xn["SAT_DATE"].InnerText);
-                    add.Add(xn["END_DATE"].InnerText);
-                    add.Add(xn["SAT_TM"].InnerText);
-                    add.Add(xn["END_TM"].InnerText);
-                    add.Add(xn["CTPRVN_CD"].InnerText);
-                    add.Add(xn["SGG_CD"].InnerText);
-                    add.Add(xn["EMD_CD"].InnerText);
-
-                    InsertData(insertQuery, add);
+                    fludmarksdata.Add(new getFludMarksDataApi()
+                    {
+                        OBJT_ID = Convert.ToInt32(xn["OBJT_ID"].InnerText),
+                        FLUD_SHIM = Convert.ToDouble(xn["FLUD_SHIM"].InnerText),
+                        FLUD_GD = Convert.ToInt32(xn["FLUD_GD"].InnerText),
+                        FLUD_AR = Convert.ToDouble(xn["FLUD_AR"].InnerText),
+                        FLUD_YEAR = Convert.ToString(xn["FLUD_YEAR"].InnerText),
+                        FLUD_NM = Convert.ToString(xn["FLUD_NM"].InnerText),
+                        FLUD_NM2 = Convert.ToString(xn["FLUD_NM2"].InnerText),
+                        SAT_DATE = Convert.ToString(xn["SAT_DATE"].InnerText),
+                        END_DATE = Convert.ToString(xn["END_DATE"].InnerText),
+                        SAT_TM = Convert.ToString(xn["SAT_TM"].InnerText),
+                        END_TM = Convert.ToString(xn["END_TM"].InnerText),
+                        CTPRVN_CD = Convert.ToString(xn["CTPRVN_CD"].InnerText),
+                        SGG_CD = Convert.ToString(xn["SGG_CD"].InnerText),
+                        EMD_CD = Convert.ToString(xn["EMD_CD"].InnerText),
+                    });
                 }
-
+                InsertData(insertQuery, fludmarksdata);
             }
             else
             {
@@ -155,7 +160,17 @@ namespace getFludMarksData.ViewModels
 
             try
             {
-                SetNaverXmlParseing(result);
+                //for (int i = 1; i <= pageNum; i++) 
+                //{ 
+                //    if (pageNum > maxPageNum)
+                //    {
+                //        return;
+                //    }
+                //    else if (pageNum == 1)
+                //    {
+                FludMarksDataXmlParseing(result);
+                //    }
+                //}
             }
             catch (Exception ex)
             {
