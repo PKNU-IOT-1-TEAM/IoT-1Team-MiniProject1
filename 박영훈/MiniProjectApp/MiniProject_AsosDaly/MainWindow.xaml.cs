@@ -39,7 +39,7 @@ namespace MiniProject_AsosDaly
         private async void BtnReqRealtime_Click(object sender, RoutedEventArgs e)
         {
 
-                string openApiUri = $"https://apis.data.go.kr/1360000/AsosDalyInfoService/getWthrDataList?serviceKey=s86nUoT8OvF9KjCQEnAYi6kAQ56CU5iiqDHjh384K4gzAVzXj4qFqiCulxZJuhz9yfgwb87yUG%2FCmL1hD5RO%2Bg%3D%3D&pageNo=1&numOfRows=365&dataType=json&dataCd=ASOS&dateCd=DAY&startDt=20000101&endDt=20230507&stnIds=159";
+                string openApiUri = $"https://apis.data.go.kr/1360000/AsosDalyInfoService/getWthrDataList?serviceKey=s86nUoT8OvF9KjCQEnAYi6kAQ56CU5iiqDHjh384K4gzAVzXj4qFqiCulxZJuhz9yfgwb87yUG%2FCmL1hD5RO%2Bg%3D%3D&pageNo=1&numOfRows=999&dataType=json&dataCd=ASOS&dateCd=DAY&startDt=20230101&endDt=20230509&stnIds=159";
                 string result = string.Empty;
 
                 // WebRequest, WebResponse 객체
