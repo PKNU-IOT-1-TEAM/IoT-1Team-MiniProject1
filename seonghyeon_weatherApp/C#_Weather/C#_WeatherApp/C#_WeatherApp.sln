@@ -5,6 +5,8 @@ VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "getFludMarksData", "getFludMarksData\getFludMarksData.csproj", "{8B802DFF-BD3B-418C-9A51-8BBE13E5E20A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "legalDong", "legalDong\legalDong.csproj", "{D3B80E33-8004-41BE-B817-FA23C3E99F94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{8B802DFF-BD3B-418C-9A51-8BBE13E5E20A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B802DFF-BD3B-418C-9A51-8BBE13E5E20A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B802DFF-BD3B-418C-9A51-8BBE13E5E20A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3B80E33-8004-41BE-B817-FA23C3E99F94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3B80E33-8004-41BE-B817-FA23C3E99F94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3B80E33-8004-41BE-B817-FA23C3E99F94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3B80E33-8004-41BE-B817-FA23C3E99F94}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
