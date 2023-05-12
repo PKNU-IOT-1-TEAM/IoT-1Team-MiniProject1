@@ -17,15 +17,6 @@
             <RowDefinition Height="30"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Grid.Column="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <ComboBox Grid.Row="0" Grid.Column="0" />
-            <ComboBox Grid.Row="0" Grid.Column="1" />
-            <ComboBox Grid.Row="0" Grid.Column="2" />
-        </Grid>
+        <TextBox Grid.Row="0" Grid.Column="0" x:Name="TxtLegalName"/>
     </Grid>
 </mah:MetroWindow>

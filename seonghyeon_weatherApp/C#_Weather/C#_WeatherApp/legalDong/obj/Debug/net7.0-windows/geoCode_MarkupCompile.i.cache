@@ -1,18 +1,18 @@
-﻿legalDong
-
+﻿geoCode
+1.0.0.0
 
 winexe
 C#
 .cs
 C:\Source\IoT-1Team-MiniProject1\seonghyeon_weatherApp\C#_Weather\C#_WeatherApp\legalDong\obj\Debug\net7.0-windows\
-legalDong
+geoCode
 none
 false
 TRACE;DEBUG;NET;NET7_0;NETCOREAPP
 C:\Source\IoT-1Team-MiniProject1\seonghyeon_weatherApp\C#_Weather\C#_WeatherApp\legalDong\App.xaml
 1176404384
 
-5112668288
+7983228258
 2421700696586
 ViewModels\MainWindow.xaml;
 

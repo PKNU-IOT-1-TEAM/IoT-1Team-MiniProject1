@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Source\\IoT-1Team-MiniProject1\\seonghyeon_weatherApp\\C#_Weather\\C#_WeatherApp\\legalDong\\legalDong.csproj": {}
+    "C:\\Source\\IoT-1Team-MiniProject1\\seonghyeon_weatherApp\\C#_Weather\\C#_WeatherApp\\legalDong\\geoCode.csproj": {}
   },
   "projects": {
-    "C:\\Source\\IoT-1Team-MiniProject1\\seonghyeon_weatherApp\\C#_Weather\\C#_WeatherApp\\legalDong\\legalDong.csproj": {
+    "C:\\Source\\IoT-1Team-MiniProject1\\seonghyeon_weatherApp\\C#_Weather\\C#_WeatherApp\\legalDong\\geoCode.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Source\\IoT-1Team-MiniProject1\\seonghyeon_weatherApp\\C#_Weather\\C#_WeatherApp\\legalDong\\legalDong.csproj",
-        "projectName": "legalDong",
-        "projectPath": "C:\\Source\\IoT-1Team-MiniProject1\\seonghyeon_weatherApp\\C#_Weather\\C#_WeatherApp\\legalDong\\legalDong.csproj",
+        "projectUniqueName": "C:\\Source\\IoT-1Team-MiniProject1\\seonghyeon_weatherApp\\C#_Weather\\C#_WeatherApp\\legalDong\\geoCode.csproj",
+        "projectName": "geoCode",
+        "projectPath": "C:\\Source\\IoT-1Team-MiniProject1\\seonghyeon_weatherApp\\C#_Weather\\C#_WeatherApp\\legalDong\\geoCode.csproj",
         "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
         "outputPath": "C:\\Source\\IoT-1Team-MiniProject1\\seonghyeon_weatherApp\\C#_Weather\\C#_WeatherApp\\legalDong\\obj\\",
         "projectStyle": "PackageReference",
