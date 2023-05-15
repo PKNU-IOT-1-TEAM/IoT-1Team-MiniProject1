@@ -1,0 +1,16 @@
+﻿<mah:MetroWindow x:Class="RiverLevelUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"    
+        xmlns:local="clr-namespace:RiverLevelUI"
+        mc:Ignorable="d"
+        Height="450" Width="800" Title=""
+                 Loaded="MetroWindow_Loaded">
+    <Grid>
+        <TextBox x:Name="Txtpredict" Text="예보" />
+    </Grid>
+</mah:MetroWindow>
